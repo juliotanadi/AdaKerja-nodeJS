@@ -1,5 +1,7 @@
 const webhookController = require("./webhookController");
+const messageController = require("./messageController");
 
 module.exports = {
-  webhook: webhookController
+  webhook: webhookController,
+  message: messageController
 };
