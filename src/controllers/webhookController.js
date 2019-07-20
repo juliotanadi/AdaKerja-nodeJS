@@ -1,5 +1,6 @@
 const request = require("request");
 const moment = require("moment");
+const Message = require("../models/Message");
 const User = require("../models/User");
 const messageChecker = require("../helpers/messageChecker");
 
@@ -44,44 +45,23 @@ async function handleMessage(req, res) {
             });
         }
 
-        const response = await sendReplyMessage(
-          senderId,
-          `Hello, may I know your name?`
-        );
-
-        if (!response)
-          return res.send({
-            error: `Error when sending message`
-          });
+        await sendReplyMessage(senderId, `Hello, may I know your name?`);
 
         return res.send({});
       }
 
       if (!user.birth_date) {
-        const response = await sendReplyMessage(
-          senderId,
-          `May I know your birth date?`
-        );
-
-        if (!response)
-          return res.send({
-            error: `Error when sending message`
-          });
+        await sendReplyMessage(senderId, `May I know your birth date?`);
 
         return res.send({});
       }
 
-      const response = await sendReplyMessage(
+      await sendReplyMessage(
         senderId,
         `Welcome back ${
           user.name
         }. Do you want to know how many days until your next birthday?`
       );
-
-      if (!response)
-        return res.send({
-          error: `Error when sending message`
-        });
 
       return res.send({});
     }
@@ -89,6 +69,11 @@ async function handleMessage(req, res) {
     const user = await User.findOne({ id: senderId });
 
     const { text: chatMessage } = messaging.message;
+
+    await Message.create({
+      user,
+      message: chatMessage
+    });
 
     if (!user.name) {
       const updatedUser = await User.findOneAndUpdate(
@@ -101,15 +86,12 @@ async function handleMessage(req, res) {
         { new: true }
       );
 
-      const response = await sendReplyMessage(
+      await sendReplyMessage(
         senderId,
         `Hello ${updatedUser.name}, may I know your date of birth?`
       );
 
-      if (!response)
-        return res.send({
-          error: `Error when sending message`
-        });
+      return res.send({});
     } else if (!user.birth_date) {
       const updatedUser = await User.findOneAndUpdate(
         {
@@ -121,17 +103,12 @@ async function handleMessage(req, res) {
         { new: true }
       );
 
-      const response = await sendReplyMessage(
+      await sendReplyMessage(
         senderId,
         `Thank you ${
           updatedUser.name
         }. Do you want to know how many days until your next birthday?`
       );
-
-      if (!response)
-        return res.send({
-          error: `Error when sending message`
-        });
 
       return res.send({});
     }
@@ -160,24 +137,14 @@ async function handleMessage(req, res) {
         )
       );
 
-      const response = await sendReplyMessage(
+      await sendReplyMessage(
         senderId,
         `There are ${dayDifference} days left until your next birthday`
       );
 
-      if (!response)
-        return res.send({
-          error: `Error when sending message`
-        });
-
       return res.send({});
     } else if (messageChecker.isNoMessage(chatMessage)) {
-      const response = await sendReplyMessage(senderId, `Goodbye`);
-
-      if (!response)
-        return res.send({
-          error: `Error when sending message`
-        });
+      await sendReplyMessage(senderId, `Goodbye`);
 
       return res.send({});
     }
