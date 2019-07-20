@@ -1,19 +1,15 @@
 const messages = require("../utils/messages");
 
 function isYesMessage(message) {
-  let isYes = false;
-  messages.acceptedMessages.forEach(acceptedMessage => {
-    if (acceptedMessage.indexOf(message.toLowerCase()) === -1) isYes = true;
+  return messages.acceptedMessages.some(acceptedMessage => {
+    return acceptedMessage.indexOf(message) !== -1;
   });
-  return isYes;
 }
 
 function isNoMessage(message) {
-  let isNo = false;
-  messages.rejectedMessages.forEach(rejectedMessage => {
-    if (rejectedMessage.indexOf(message.toLowerCase()) === -1) isNo = true;
+  return messages.rejectedMessages.some(rejectedMessage => {
+    return rejectedMessage.indexOf(message) !== -1;
   });
-  return isNo;
 }
 
 module.exports = {
